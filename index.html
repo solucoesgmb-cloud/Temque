@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>temque | Gestão Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: rgba(255, 255, 255, 0.06);
+            --text: #f8fafc;
+            --warning: #f59e0b;
+            --muted: #64748b;
+            --input-bg: #1e293b;
+            --action-btn: #22c55e;
+            --prof-color: #0ea5e9;
+            --pers-color: #ec4899;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            padding-bottom: 90px;
+            transition: 0.3s;
+        }
+
+        body.ctx-prof { --primary: var(--prof-color); }
+        body.ctx-pers { --primary: var(--pers-color); }
+
+        .app-container { width: 100%; max-width: 500px; }
+        .app-container.wide { max-width: 1200px; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%; }
+        .header h1 { font-size: 1.8rem; font-weight: 800; color: #818cf8; letter-spacing: -1px; }
+
+        .context-switcher { display: flex; gap: 2px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 8px; font-size: 0.6rem; }
+        .context-switcher button { padding: 5px 8px; border: none; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font-weight: bold; }
+        .context-switcher button.active { background: var(--primary); color: white; }
+
+        .search-container { width: 100%; background: var(--input-bg); border-radius: 12px; padding: 10px 15px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .search-input { background: transparent; border: none; color: white; flex: 1; outline: none; font-size: 0.9rem; }
+
+        .review-bar { background: var(--card); border-radius: 12px; padding: 8px 12px; margin-bottom: 15px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .review-bar label { font-size: 0.6rem; font-weight: bold; color: var(--muted); }
+        .review-bar input, .review-bar select { font-size: 0.7rem; padding: 4px; background: var(--input-bg); color: white; border: 1px solid #334155; border-radius: 5px; }
+
+        .view-toggle { margin-bottom: 20px; background: var(--card); padding: 4px; border-radius: 10px; display: inline-flex; gap: 4px; }
+        .view-toggle button { background: transparent; border: none; color: var(--muted); padding: 6px 12px; border-radius: 7px; cursor: pointer; font-size: 0.8rem; }
+        .view-toggle button.active { background: var(--primary); color: white; }
+
+        .whatsapp-input-bar { position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .input-wrapper { width: 100%; max-width: 500px; display: flex; gap: 8px; align-items: center; }
+        .text-input-field { flex: 1; background: var(--input-bg); border-radius: 25px; padding: 10px 18px; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; font-size: 0.95rem; }
+        .action-btn-circle { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--action-btn); color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .action-btn-circle.recording { background: #ef4444; animation: pulse-small 1.5s infinite; }
+
+        .task-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .task-item { background: var(--card); padding: 15px; border-radius: 15px; border-left: 4px solid var(--primary); position: relative; }
+        .task-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .task-text { font-size: 1rem; color: #fff; flex: 1; outline: none; border-bottom: 1px solid transparent; }
+        .task-text[contenteditable="true"] { border-bottom: 1px dashed var(--primary); background: rgba(255,255,255,0.03); }
+        .actions { display: flex; gap: 12px; align-items: center; }
+        .action-icon { cursor: pointer; color: var(--muted); font-size: 0.9rem; transition: 0.2s; }
+        .action-icon:hover { color: white; }
+        
+        .schedule-panel { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .schedule-panel input { width: 100%; background: #0f172a; color: white; border: 1px solid #334155; padding: 8px; border-radius: 8px; }
+
+        #weekly-view { display: none; overflow-x: auto; padding-bottom: 20px; gap: 15px; width: 100%; }
+        .day-column { min-width: 250px; flex: 1; background: rgba(255,255,255,0.02); border-radius: 15px; padding: 10px; }
+        .day-header { text-align: center; font-weight: 800; padding: 10px; color: var(--primary); border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 10px; }
+        .kanban-task { background: var(--card); padding: 10px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 5px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; }
+
+        @keyframes pulse-small {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        @media print {
+            .top-bar, .review-bar, .view-toggle, .whatsapp-input-bar, .search-container { display: none !important; }
+            #weekly-view { display: flex !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="mainContainer">
+        <div class="top-bar">
+            <div class="header"><h1>temque</h1></div>
+            <div class="context-switcher">
+                <button id="ctx-all" class="active" onclick="setContext('all')">GERAL</button>
+                <button id="ctx-pers" onclick="setContext('pers')">PESSOAL</button>
+                <button id="ctx-prof" onclick="setContext('prof')">PROFISSIONAL</button>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <i class="fas fa-search" style="color:var(--muted)"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar nas tarefas..." oninput="renderList()">
+        </div>
+
+        <div class="review-bar">
+            <label>REVISÃO:</label>
+            <input type="datetime-local" id="revTime">
+            <select id="revFreq">
+                <option value="none">Única</option>
+                <option value="daily">Diária</option>
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensal</option>
+            </select>
+            <button onclick="saveReview()" style="background:var(--primary); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.6rem;">SALVAR</button>
+        </div>
+
+        <center>
+            <div class="view-toggle">
+                <button id="listBtn" class="active" onclick="switchView('list')">Lista</button>
+                <button id="weekBtn" onclick="switchView('week')">Semana</button>
+            </div>
+            <br>
+            <button id="printBtn" style="display:none; background:#334155; color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-size:0.8rem;" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir Semana
+            </button>
+        </center>
+
+        <div id="list-view" class="task-list"></div>
+        <div id="weekly-view"></div>
+    </div>
+
+    <div class="whatsapp-input-bar">
+        <div class="input-wrapper">
+            <input type="text" id="taskInput" class="text-input-field" placeholder="Digite uma tarefa..." oninput="toggleBtnIcon()">
+            <button id="actionBtn" class="action-btn-circle" onclick="handleAction()">
+                <i id="btnIcon" class="fas fa-microphone"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const actionBtn = document.getElementById('actionBtn');
+        const btnIcon = document.getElementById('btnIcon');
+        const searchInput = document.getElementById('searchInput');
+        const listView = document.getElementById('list-view');
+        const weeklyView = document.getElementById('weekly-view');
+        const mainContainer = document.getElementById('mainContainer');
+
+        let tasks = JSON.parse(localStorage.getItem('temque_v17')) || [];
+        let reviewConfig = JSON.parse(localStorage.getItem('temque_rev_v17')) || null;
+        let currentContext = 'all';
+
+        function toggleBtnIcon() {
+            if (taskInput.value.trim() !== "") {
+                btnIcon.className = "fas fa-paper-plane";
+                actionBtn.style.background = "var(--primary)";
+            } else {
+                btnIcon.className = "fas fa-microphone";
+                actionBtn.style.background = "var(--action-btn)";
+            }
+        }
+
+        function handleAction() {
+            if (taskInput.value.trim() !== "") { saveTask(taskInput.value); } 
+            else { startVoice(); }
+        }
+
+        function startVoice() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'pt-BR';
+                recognition.onstart = () => actionBtn.classList.add('recording');
+                recognition.onresult = (e) => saveTask(e.results[0][0].transcript);
+                recognition.onend = () => actionBtn.classList.remove('recording');
+                recognition.start();
+            }
+        }
+
+        function setContext(ctx) {
+            currentContext = ctx;
+            document.querySelectorAll('.context-switcher button').forEach(b => b.classList.remove('active'));
+            document.getElementById('ctx-' + ctx).classList.add('active');
+            document.body.className = ctx === 'all' ? '' : 'ctx-' + ctx;
+            update();
+        }
+
+        function saveTask(text) {
+            if (!text.trim()) return;
+            // Se estiver no Geral (all), salva como contexto 'all'
+            const taskCtx = currentContext;
+            tasks.unshift({ id: Date.now(), content: text, schedule: null, notified: false, context: taskCtx });
+            taskInput.value = "";
+            toggleBtnIcon();
+            update();
+        }
+
+        function switchView(mode) {
+            const isList = mode === 'list';
+            listView.style.display = isList ? 'flex' : 'none';
+            weeklyView.style.display = isList ? 'none' : 'flex';
+            document.getElementById('printBtn').style.display = isList ? 'none' : 'inline-block';
+            mainContainer.classList.toggle('wide', !isList);
+            document.getElementById('listBtn').classList.toggle('active', isList);
+            document.getElementById('weekBtn').classList.toggle('active', !isList);
+            if(!isList) renderWeekly();
+        }
+
+        function update() {
+            localStorage.setItem('temque_v17', JSON.stringify(tasks));
+            renderList();
+            if(weeklyView.style.display === 'flex') renderWeekly();
+        }
+
+        function renderList() {
+            const term = searchInput.value.toLowerCase();
+            const filtered = tasks.filter(t => {
+                const matchCtx = currentContext === 'all' || t.context === currentContext;
+                const matchSearch = t.content.toLowerCase().includes(term);
+                return matchCtx && matchSearch;
+            });
+
+            listView.innerHTML = filtered.map(t => {
+                const borderColor = t.context === 'prof' ? 'var(--prof-color)' : 
+                                  t.context === 'pers' ? 'var(--pers-color)' : 'var(--primary)';
+                return `
+                <div class="task-item" style="border-left-color: ${borderColor}">
+                    <div class="task-main">
+                        <span class="task-text" id="txt-${t.id}" onblur="saveEdit(${t.id})">${t.content}</span>
+                        <div class="actions">
+                            <i class="fas fa-pencil-alt action-icon" onclick="editT(${t.id})" title="Editar"></i>
+                            <i class="fas fa-clock action-icon" onclick="toggleS('${t.id}')" title="Agendar"></i>
+                            <i class="fas fa-trash action-icon" onclick="deleteT(${t.id})" title="Excluir"></i>
+                        </div>
+                    </div>
+                    <div id="s-${t.id}" class="schedule-panel">
+                        <input type="datetime-local" value="${t.schedule || ''}" onchange="setS(${t.id}, this.value)">
+                    </div>
+                    ${t.schedule ? `<div style="margin-top:8px; opacity:0.6; font-size:0.65rem;"><i class="fas fa-bell"></i> ${new Date(t.schedule).toLocaleString('pt-BR')}</div>` : ''}
+                </div>
+            `}).join('');
+        }
+
+        function editT(id) {
+            const el = document.getElementById('txt-' + id);
+            el.contentEditable = "true";
+            el.focus();
+            // Coloca o cursor no fim do texto
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        function saveEdit(id) {
+            const el = document.getElementById('txt-' + id);
+            el.contentEditable = "false";
+            const task = tasks.find(t => t.id === id);
+            if(task) {
+                task.content = el.innerText;
+                localStorage.setItem('temque_v17', JSON.stringify(tasks));
+            }
+        }
+
+        function renderWeekly() {
+            const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            weeklyView.innerHTML = '';
+            for(let i = 0; i < 7; i++) {
+                let d = new Date(); d.setDate(d.getDate() + i);
+                let col = document.createElement('div'); col.className = 'day-column';
+                col.innerHTML = `<div class="day-header">${days[d.getDay()]} <br><small style="font-size:0.6rem; opacity:0.5">${d.toLocaleDateString('pt-BR').slice(0,5)}</small></div>`;
+
+                ['Manhã', 'Tarde', 'Noite'].forEach(period => {
+                    let pTasks = tasks.filter(t => {
+                        if(!t.schedule || (currentContext !== 'all' && t.context !== currentContext)) return false;
+                        let sDate = new Date(t.schedule);
+                        return sDate.toDateString() === d.toDateString() && (
+                            period === 'Manhã' ? (sDate.getHours()>=5 && sDate.getHours()<12) :
+                            period === 'Tarde' ? (sDate.getHours()>=12 && sDate.getHours()<18) : (sDate.getHours()>=18 || sDate.getHours()<5)
+                        );
+                    });
+                    if(pTasks.length > 0) {
+                        let sec = document.createElement('div'); sec.className = 'period-section';
+                        sec.innerHTML = `<div style="font-size:0.6rem; color:var(--muted); margin: 5px 0;">${period}</div>`;
+                        pTasks.forEach(pt => {
+                            const bCol = pt.context === 'prof' ? 'var(--prof-color)' : pt.context === 'pers' ? 'var(--pers-color)' : 'var(--primary)';
+                            sec.innerHTML += `<div class="kanban-task" style="border-left-color:${bCol}"><span>${pt.content}</span><i class="fas fa-trash-alt" style="font-size:0.7rem; cursor:pointer" onclick="deleteT(${pt.id})"></i></div>`;
+                        });
+                        col.appendChild(sec);
+                    }
+                });
+                weeklyView.appendChild(col);
+            }
+        }
+
+        function deleteT(id) { tasks = tasks.filter(x => x.id !== id); update(); }
+        function toggleS(id) { let e = document.getElementById('s-'+id); e.style.display = e.style.display==='block'?'none':'block'; }
+        function setS(id, v) { let t = tasks.find(x=>x.id===id); t.schedule=v; t.notified=false; update(); }
+        function saveReview() {
+            reviewConfig = { time: document.getElementById('revTime').value, freq: document.getElementById('revFreq').value };
+            localStorage.setItem('temque_rev_v17', JSON.stringify(reviewConfig));
+            alert("Revisão salva!");
+        }
+
+        taskInput.onkeypress = (e) => { if(e.key === 'Enter') handleAction() };
+        renderList();
+        if(reviewConfig) { document.getElementById('revTime').value = reviewConfig.time; document.getElementById('revFreq').value = reviewConfig.freq; }
+    </script>
+</body>
+</html>
