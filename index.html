@@ -2,19 +2,18 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>temque | Gestão Inteligente</title>
     
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="temque">
-    <meta name="theme-color" content="#0f172a">
-    
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22temque%22,%22short_name%22:%22temque%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#0f172a%22,%22theme_color%22:%22#6366f1%22,%22icons%22:[{%22src%22:%22https://via.placeholder.com/192/6366f1/ffffff?text=TQ%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="application-name" content="temque">
     <meta name="apple-mobile-web-app-title" content="temque">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/6366f1/ffffff?text=TQ">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="msapplication-navbutton-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="manifest" id="manifest-placeholder">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -45,27 +44,6 @@
             padding-bottom: 100px;
         }
 
-        /* Banner de Instalação para Android */
-        #installBanner {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            z-index: 9999;
-            font-size: 0.8rem;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 400px;
-            justify-content: space-between;
-            align-items: center;
-        }
-
         body.ctx-prof { --primary: var(--prof-color); }
         body.ctx-pers { --primary: var(--pers-color); }
 
@@ -90,15 +68,14 @@
         .input-wrapper { width: 100%; max-width: 500px; display: flex; gap: 10px; align-items: center; }
         .text-input-field { flex: 1; background: var(--input-bg); border-radius: 25px; padding: 12px 20px; border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; font-size: 1rem; }
         .action-btn-circle { width: 50px; height: 50px; border-radius: 50%; border: none; background: var(--action-btn); color: white; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .action-btn-circle.recording { background: #ef4444; animation: pulse 1.5s infinite; }
 
         .task-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-        .task-item { background: var(--card); padding: 18px; border-radius: 16px; border-left: 5px solid var(--primary); position: relative; }
+        .task-item { background: var(--card); padding: 18px; border-radius: 16px; border-left: 5px solid var(--primary); }
         .task-main { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
         .task-text { font-size: 1.05rem; color: #fff; flex: 1; outline: none; }
         
         .editing { border-left-color: var(--edit-on) !important; background: rgba(255,255,255,0.12); }
-        .editing .task-text { background: rgba(0,0,0,0.2); border-radius: 4px; padding: 2px 5px; }
-
         .actions { display: flex; gap: 15px; align-items: center; }
         .action-icon { cursor: pointer; color: var(--muted); font-size: 1.1rem; }
 
@@ -107,21 +84,10 @@
         .day-header { text-align: center; font-weight: 800; padding: 10px; color: var(--primary); border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
         .kanban-task { background: var(--card); padding: 12px; border-radius: 12px; font-size: 0.9rem; margin-bottom: 8px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; }
 
-        @media print {
-            .top-bar, .view-toggle, .whatsapp-input-bar, .search-container, .actions, #printBtn, #installBanner { display: none !important; }
-            body { background: white !important; }
-            #weekly-view { display: flex !important; flex-wrap: wrap !important; }
-            .day-column { border: 1px solid #eee !important; min-width: 45% !important; margin-bottom: 20px; }
-            .day-header, .kanban-task { color: black !important; }
-        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
 <body>
-
-    <div id="installBanner">
-        <span>Instalar temque na tela inicial?</span>
-        <button onclick="triggerInstall()" style="background:white; color:var(--primary); border:none; padding:5px 12px; border-radius:15px; font-weight:bold; font-size:0.7rem;">INSTALAR</button>
-    </div>
 
     <div class="app-container" id="mainContainer">
         <div class="top-bar">
@@ -143,10 +109,6 @@
                 <button id="listBtn" class="active" onclick="switchView('list')">Lista</button>
                 <button id="weekBtn" onclick="switchView('week')">Semana</button>
             </div>
-            <br>
-            <button id="printBtn" style="display:none; background:#334155; color:white; border:none; padding:12px 24px; border-radius:10px; cursor:pointer; font-size:0.9rem;" onclick="window.print()">
-                <i class="fas fa-file-pdf"></i> Imprimir Semana
-            </button>
         </center>
 
         <div id="list-view" class="task-list"></div>
@@ -163,40 +125,29 @@
     </div>
 
     <script>
-        let deferredPrompt;
-        const installBanner = document.getElementById('installBanner');
+        // GERADOR DE MANIFESTO PARA FORÇAR O CHROME
+        const baseManifest = {
+            "name": "temque",
+            "short_name": "temque",
+            "start_url": window.location.href,
+            "display": "standalone",
+            "orientation": "portrait",
+            "background_color": "#0f172a",
+            "theme_color": "#6366f1",
+            "icons": [{"src": "https://via.placeholder.com/512/6366f1/ffffff?text=temque", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]
+        };
+        const blob = new Blob([JSON.stringify(baseManifest)], {type: 'application/json'});
+        document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
 
-        // Captura o evento de instalação do Chrome
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBanner.style.display = 'flex';
-        });
-
-        function triggerInstall() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        installBanner.style.display = 'none';
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                alert("Clique nos 3 pontinhos do Chrome e selecione 'Instalar Aplicativo'.");
-            }
-        }
-
-        // Script de Gestão de Dados
+        // Lógica do App
         const taskInput = document.getElementById('taskInput');
         const actionBtn = document.getElementById('actionBtn');
         const btnIcon = document.getElementById('btnIcon');
         const searchInput = document.getElementById('searchInput');
         const listView = document.getElementById('list-view');
         const weeklyView = document.getElementById('weekly-view');
-        const mainContainer = document.getElementById('mainContainer');
 
-        let tasks = JSON.parse(localStorage.getItem('temque_v22')) || [];
+        let tasks = JSON.parse(localStorage.getItem('temque_v25')) || [];
         let currentContext = 'all';
 
         function toggleBtnIcon() {
@@ -210,8 +161,8 @@
         }
 
         function handleAction() {
-            if (taskInput.value.trim() !== "") { saveTask(taskInput.value); } 
-            else { startVoice(); }
+            if (taskInput.value.trim() !== "") saveTask(taskInput.value);
+            else startVoice();
         }
 
         function startVoice() {
@@ -245,17 +196,14 @@
             const isList = mode === 'list';
             listView.style.display = isList ? 'flex' : 'none';
             weeklyView.style.display = isList ? 'none' : 'flex';
-            document.getElementById('printBtn').style.display = isList ? 'none' : 'inline-block';
-            mainContainer.classList.toggle('wide', !isList);
             document.getElementById('listBtn').classList.toggle('active', isList);
             document.getElementById('weekBtn').classList.toggle('active', !isList);
             if(!isList) renderWeekly();
         }
 
         function update() {
-            localStorage.setItem('temque_v22', JSON.stringify(tasks));
+            localStorage.setItem('temque_v25', JSON.stringify(tasks));
             renderList();
-            if(weeklyView.style.display === 'flex') renderWeekly();
         }
 
         function renderList() {
@@ -269,11 +217,11 @@
             listView.innerHTML = filtered.map(t => {
                 const bCol = t.context === 'prof' ? 'var(--prof-color)' : t.context === 'pers' ? 'var(--pers-color)' : 'var(--primary)';
                 return `
-                <div class="task-item" id="item-${t.id}" style="border-left-color: ${bCol}">
+                <div class="task-item" style="border-left-color: ${bCol}">
                     <div class="task-main">
                         <span class="task-text" id="txt-${t.id}">${t.content}</span>
                         <div class="actions">
-                            <i class="fas fa-pencil-alt action-icon" onclick="toggleEdit(${t.id})" title="Editar"></i>
+                            <i class="fas fa-pencil-alt action-icon" onclick="toggleEdit(${t.id})"></i>
                             <i class="fas fa-clock action-icon" onclick="toggleS('${t.id}')"></i>
                             <i class="fas fa-trash action-icon" onclick="deleteT(${t.id})"></i>
                         </div>
@@ -281,23 +229,19 @@
                     <div id="s-${t.id}" style="display:none; margin-top:10px;">
                         <input type="datetime-local" value="${t.schedule || ''}" onchange="setS(${t.id}, this.value)" style="width:100%; background:#1e293b; color:white; border:1px solid #334155; padding:8px; border-radius:8px;">
                     </div>
-                    ${t.schedule ? `<div style="margin-top:8px; opacity:0.6; font-size:0.7rem;"><i class="fas fa-bell"></i> ${new Date(t.schedule).toLocaleString('pt-BR')}</div>` : ''}
                 </div>
             `}).join('');
         }
 
         function toggleEdit(id) {
-            const item = document.getElementById('item-' + id);
             const text = document.getElementById('txt-' + id);
-            if (!item.classList.contains('editing')) {
-                item.classList.add('editing');
-                text.contentEditable = "true";
-                text.focus();
-            } else {
-                item.classList.remove('editing');
-                text.contentEditable = "false";
+            const isEditing = text.contentEditable === "true";
+            text.contentEditable = !isEditing;
+            if(!isEditing) { text.focus(); }
+            else { 
                 const task = tasks.find(t => t.id === id);
-                if(task) { task.content = text.innerText; update(); }
+                if(task) task.content = text.innerText;
+                update();
             }
         }
 
@@ -307,27 +251,7 @@
             for(let i = 0; i < 7; i++) {
                 let d = new Date(); d.setDate(d.getDate() + i);
                 let col = document.createElement('div'); col.className = 'day-column';
-                col.innerHTML = `<div class="day-header">${days[d.getDay()]} <br><small style="opacity:0.6; font-size:0.7rem">${d.toLocaleDateString('pt-BR').slice(0,5)}</small></div>`;
-                
-                ['Manhã', 'Tarde', 'Noite'].forEach(period => {
-                    let pTasks = tasks.filter(t => {
-                        if(!t.schedule || (currentContext !== 'all' && t.context !== currentContext)) return false;
-                        let sDate = new Date(t.schedule);
-                        return sDate.toDateString() === d.toDateString() && (
-                            period === 'Manhã' ? (sDate.getHours()>=5 && sDate.getHours()<12) :
-                            period === 'Tarde' ? (sDate.getHours()>=12 && sDate.getHours()<18) : (sDate.getHours()>=18 || sDate.getHours()<5)
-                        );
-                    });
-                    if(pTasks.length > 0) {
-                        let sec = document.createElement('div');
-                        sec.innerHTML = `<div style="font-size:0.65rem; color:var(--muted); margin: 8px 0 4px 0; font-weight:bold;">${period}</div>`;
-                        pTasks.forEach(pt => {
-                            const bc = pt.context === 'prof' ? 'var(--prof-color)' : pt.context === 'pers' ? 'var(--pers-color)' : 'var(--primary)';
-                            sec.innerHTML += `<div class="kanban-task" style="border-left-color:${bc}"><span>${pt.content}</span><i class="fas fa-trash-alt" style="font-size:0.75rem; cursor:pointer;" onclick="deleteT(${pt.id})"></i></div>`;
-                        });
-                        col.appendChild(sec);
-                    }
-                });
+                col.innerHTML = <div class="day-header">${days[d.getDay()]}</div>;
                 weeklyView.appendChild(col);
             }
         }
